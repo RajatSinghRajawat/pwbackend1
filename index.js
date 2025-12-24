@@ -27,6 +27,7 @@ const centreRoutes = require('./src/routes/centreRoutes');
 const instructorRoutes = require('./src/routes/instructorRoutes');
 const studentRoutes = require('./src/routes/students.jsx');
 const bookRoutes = require('./src/routes/bookroutes');
+const getStartedRoutes = require('./src/routes/getStartedRoutes');
 
 // Import error handlers
 const { errorHandler, notFound } = require('./src/middleware/errorHandler');
@@ -107,6 +108,7 @@ app.use('/api/centres', centreRoutes);
 app.use('/api/instructors', instructorRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/bookdemo', bookRoutes);
+app.use('/api/get-started', getStartedRoutes);
 
 // 404 handler
 app.use(notFound);
@@ -117,9 +119,13 @@ app.use(errorHandler);
 // Start server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
+// Initialize Socket.IO
+const { initializeSocket } = require('./src/socket/socketServer');
+initializeSocket(server);
 
 module.exports = app;
