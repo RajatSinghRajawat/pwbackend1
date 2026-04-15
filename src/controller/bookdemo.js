@@ -233,11 +233,37 @@ const deleteBookDemo = async (req, res) => {
     }
 };
 
+// @desc    Get current user's demo bookings
+// @route   GET /api/bookdemo/me
+// @access  Private (User)
+const getMyBookings = async (req, res) => {
+    try {
+        const bookings = await BookDemo.find({ email: req.user.email })
+            .populate('course', 'title category')
+            .populate('centre', 'name address phone email')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: bookings,
+            count: bookings.length
+        });
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching demo bookings',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     createBookDemo,
     getAllBookDemos,
     getBookDemoById,
     updateBookDemo,
-    deleteBookDemo
+    deleteBookDemo,
+    getMyBookings
 };
 

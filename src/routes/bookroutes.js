@@ -5,12 +5,16 @@ const {
     getAllBookDemos,
     getBookDemoById,
     updateBookDemo,
-    deleteBookDemo
+    deleteBookDemo,
+    getMyBookings
 } = require('../controller/bookdemo');
 const { authenticateUser, authenticateAdmin } = require('../middleware/auth');
 
 // Public routes
 router.post('/', createBookDemo);
+
+// Protected routes (User)
+router.get('/me', authenticateUser, getMyBookings);
 
 // Protected routes (Admin only)
 router.get('/', authenticateAdmin, getAllBookDemos);

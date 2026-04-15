@@ -211,11 +211,162 @@ const deleteStudent = async (req, res) => {
     }
 };
 
+// @desc    Get current student's profile
+// @route   GET /api/students/me
+// @access  Private (Student)
+const getMyProfile = async (req, res) => {
+    try {
+        // Find student by email from authenticated user
+        const student = await Student.findOne({ email: req.user.email })
+            .select('-password')
+            .populate('courses', 'title description price')
+            .populate('batches', 'title description');
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                message: 'Student profile not found. Please complete your profile.'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: student
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching student profile',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Create current student's profile
+// @route   POST /api/students/me
+// @access  Private (Student)
+const createMyProfile = async (req, res) => {
+    try {
+        const {
+            name,
+            lastName,
+            phone,
+            address
+        } = req.body;
+
+        // Check if student already exists
+        const existingStudent = await Student.findOne({ email: req.user.email });
+        if (existingStudent) {
+            return res.status(400).json({
+                success: false,
+                message: 'Student profile already exists'
+            });
+        }
+
+        // Create student profile using authenticated user's email
+        // Use a default password (user should use auth/password to change it)
+        const salt = await bcrypt.genSalt(10);
+        const defaultPassword = await bcrypt.hash('temp123', salt); // Temporary password
+
+        const student = new Student({
+            name: name || req.user.name,
+            lastName: lastName || '',
+            email: req.user.email,
+            phone: phone || req.user.phone,
+            password: defaultPassword, // Will be updated via auth/password route
+            address: address || {}
+        });
+
+        const savedStudent = await student.save();
+        savedStudent.password = undefined;
+
+        res.status(201).json({
+            success: true,
+            message: 'Student profile created successfully',
+            data: savedStudent
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: 'Error creating profile',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Update current student's profile
+// @route   PUT /api/students/me
+// @access  Private (Student)
+const updateMyProfile = async (req, res) => {
+    try {
+        const updateData = { ...req.body, updatedAt: Date.now() };
+
+        // Don't allow password update through this route (use auth/password)
+        delete updateData.password;
+        // Don't allow email update
+        delete updateData.email;
+
+        // Find student by email
+        let student = await Student.findOne({ email: req.user.email });
+
+        // If student doesn't exist, create it
+        if (!student) {
+            // Create student profile
+            const salt = await bcrypt.genSalt(10);
+            const defaultPassword = await bcrypt.hash('temp123', salt);
+
+            student = new Student({
+                name: updateData.name || req.user.name,
+                lastName: updateData.lastName || '',
+                email: req.user.email,
+                phone: updateData.phone || req.user.phone,
+                password: defaultPassword,
+                address: updateData.address || {}
+            });
+
+            await student.save();
+            student.password = undefined;
+            student = await Student.findById(student._id)
+                .select('-password')
+                .populate('courses', 'title description price')
+                .populate('batches', 'title description');
+
+            return res.status(201).json({
+                success: true,
+                message: 'Profile created and updated successfully',
+                data: student
+            });
+        }
+
+        // Update existing student
+        student = await Student.findOneAndUpdate(
+            { email: req.user.email },
+            updateData,
+            { new: true, runValidators: true }
+        ).select('-password').populate('courses', 'title description price').populate('batches', 'title description');
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: student
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: 'Error updating profile',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getAllStudents,
     getStudentById,
     createStudent,
     updateStudent,
-    deleteStudent
+    deleteStudent,
+    getMyProfile,
+    createMyProfile,
+    updateMyProfile
 };
 

@@ -262,6 +262,31 @@ const updateGetStarted = async (req, res) => {
     }
 };
 
+// @desc    Get current user's get started submissions
+// @route   GET /api/get-started/me
+// @access  Private (Student)
+const getMySubmissions = async (req, res) => {
+    try {
+        const submissions = await GetStarted.find({ email: req.user.email })
+            .populate('course', 'title category')
+            .populate('centre', 'name city address')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: submissions,
+            count: submissions.length
+        });
+    } catch (error) {
+        console.error('Error fetching user submissions:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching submissions',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Delete get started submission
 // @route   DELETE /api/get-started/:id
 // @access  Private (Admin)
@@ -375,6 +400,7 @@ module.exports = {
     getGetStartedById,
     updateGetStarted,
     deleteGetStarted,
-    getStats
+    getStats,
+    getMySubmissions
 };
 

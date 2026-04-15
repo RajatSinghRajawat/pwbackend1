@@ -6,12 +6,16 @@ const {
     getGetStartedById,
     updateGetStarted,
     deleteGetStarted,
-    getStats
+    getStats,
+    getMySubmissions
 } = require('../controller/getStartedController');
-const { authenticateAdmin } = require('../middleware/auth');
+const { authenticateAdmin, authenticateUser } = require('../middleware/auth');
 
 // Public routes
 router.post('/', createGetStarted);
+
+// Student's own submissions route (Authenticated users)
+router.get('/me', authenticateUser, getMySubmissions);
 
 // Protected routes (Admin only)
 router.get('/', authenticateAdmin, getAllGetStarted);

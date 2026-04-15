@@ -40,11 +40,6 @@ const productSchema = new mongoose.Schema({
         default: 0,
         min: 0
     },
-    sku: {
-        type: String,
-        unique: true,
-        trim: true
-    },
     images: [{
         type: String,
         trim: true
@@ -153,6 +148,11 @@ const Product = mongoose.model('Product', productSchema);
 if (!mongoose.models.store) {
     mongoose.model('store', productSchema);
 }
+
+// Drop old sku index if it exists (one-time fix for duplicate key error)
+Product.collection.dropIndex('sku_1').catch(() => {
+    // Index doesn't exist or already dropped, ignore error
+});
 
 module.exports = Product;
 

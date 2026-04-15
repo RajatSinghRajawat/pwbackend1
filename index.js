@@ -32,38 +32,6 @@ const getStartedRoutes = require('./src/routes/getStartedRoutes');
 // Import error handlers
 const { errorHandler, notFound } = require('./src/middleware/errorHandler');
 
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const winston = require('winston');
-
-// Logger configuration
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'pw-backend' },
-    transports: [
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' }),
-    ],
-});
-
-if (process.env.NODE_ENV !== 'production') {
-    logger.add(new winston.transports.Console({
-        format: winston.format.simple(),
-    }));
-}
-
-// Middleware
-app.use(helmet()); // Security headers
-
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.'
-});
-app.use(limiter);
-
 // CORS configuration
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
@@ -79,8 +47,8 @@ app.use(cookieParser());
 // Serve static files from public directory
 app.use('/Uploads', express.static(path.join(__dirname, 'public', 'Uploads')));
 
-// Logging middleware
-app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+// Simple logging to console
+app.use(morgan('dev'));
 
 // Connect to database
 connectDB();

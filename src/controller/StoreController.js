@@ -97,16 +97,18 @@ const getProductById = async (req, res) => {
 // @access  Private (Admin)
 const createProduct = async (req, res) => {
     try {
-        // Handle uploaded images (image + thumbnail like courses)
+        // Remove sku field if present to avoid duplicate key error
+        delete req.body.sku;
+        
         if (req.files) {
             if (req.files.image && req.files.image[0]) {
-                const imagePath = `/Uploads/${req.files.image[0].filename}`;
+                const imagePath = `${req.files.image[0].filename}`;
                 // Store main image also in images array
                 req.body.images = [imagePath];
                 req.body.thumbnail = req.body.thumbnail || imagePath;
             }
             if (req.files.thumbnail && req.files.thumbnail[0]) {
-                req.body.thumbnail = `/Uploads/${req.files.thumbnail[0].filename}`;
+                req.body.thumbnail = `${req.files.thumbnail[0].filename}`;
             }
         }
 
@@ -137,14 +139,17 @@ const createProduct = async (req, res) => {
 // @access  Private (Admin)
 const updateProduct = async (req, res) => {
     try {
+        // Remove sku field if present to avoid duplicate key error
+        delete req.body.sku;
+        
         if (req.files) {
             if (req.files.image && req.files.image[0]) {
-                const imagePath = `/Uploads/${req.files.image[0].filename}`;
+                const imagePath = `${req.files.image[0].filename}`;
                 req.body.images = [imagePath];
                 req.body.thumbnail = req.body.thumbnail || imagePath;
             }
             if (req.files.thumbnail && req.files.thumbnail[0]) {
-                req.body.thumbnail = `/Uploads/${req.files.thumbnail[0].filename}`;
+                req.body.thumbnail = `${req.files.thumbnail[0].filename}`;
             }
         }
 

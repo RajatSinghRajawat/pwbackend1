@@ -304,6 +304,48 @@ const validateAuth = {
         }
 
         next();
+    },
+    forgotPassword: (req, res, next) => {
+        const errors = [];
+        const { email } = req.body;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+            errors.push({ field: 'email', message: 'Valid email is required' });
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors
+            });
+        }
+
+        next();
+    },
+    resetPassword: (req, res, next) => {
+        const errors = [];
+        const { token } = req.params; // Token comes from URL parameter
+        const { password } = req.body;
+
+        if (!token || token.trim().length === 0) {
+            errors.push({ field: 'token', message: 'Reset token is required' });
+        }
+
+        if (!password || password.length < 6) {
+            errors.push({ field: 'password', message: 'Password must be at least 6 characters' });
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors
+            });
+        }
+
+        next();
     }
 };
 

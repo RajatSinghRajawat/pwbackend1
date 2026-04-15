@@ -103,10 +103,10 @@ const createCourse = async (req, res) => {
         // Handle uploaded images
         if (req.files) {
             if (req.files.image && req.files.image[0]) {
-                req.body.image = `/Uploads/${req.files.image[0].filename}`;
+                req.body.image = `${req.files.image[0].filename}`;
             }
             if (req.files.thumbnail && req.files.thumbnail[0]) {
-                req.body.thumbnail = `/Uploads/${req.files.thumbnail[0].filename}`;
+                req.body.thumbnail = `${req.files.thumbnail[0].filename}`;
             }
         }
 
@@ -148,10 +148,10 @@ const updateCourse = async (req, res) => {
         // Handle uploaded images
         if (req.files) {
             if (req.files.image && req.files.image[0]) {
-                req.body.image = `/Uploads/${req.files.image[0].filename}`;
+                req.body.image = `${req.files.image[0].filename}`;
             }
             if (req.files.thumbnail && req.files.thumbnail[0]) {
-                req.body.thumbnail = `/Uploads/${req.files.thumbnail[0].filename}`;
+                req.body.thumbnail = `${req.files.thumbnail[0].filename}`;
             }
         }
 
