@@ -68,6 +68,27 @@ const getAllCourses = async (req, res) => {
     }
 };
 
+// @desc    Get all courses without pagination
+// @route   GET /api/courses/all-data
+// @access  Public
+const getAllCoursesData = async (req, res) => {
+    try {
+        const courses = await Course.find({}).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: courses.length,
+            data: courses
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching all courses data',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Get single course by ID
 // @route   GET /api/courses/:id
 // @access  Public
@@ -378,6 +399,7 @@ const incrementStudentCount = async (req, res) => {
 
 module.exports = {
     getAllCourses,
+    getAllCoursesData,
     getCourseById,
     createCourse,
     updateCourse,

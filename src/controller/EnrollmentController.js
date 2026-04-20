@@ -180,11 +180,15 @@ const createEnrollment = async (req, res) => {
         // Populate references
         await enrollment.populate('userId courseId batchId');
 
-        // Update course/batch enrolled students count
+        // Update course/batch enrolled students count and user's enrolledCourses
         if (enrollmentType === 'course' && courseId) {
             await Course.findByIdAndUpdate(courseId, { $inc: { students: 1 } });
+            await User.findByIdAndUpdate(userId, { $addToSet: { enrolledCourses: courseId } });
         } else if (enrollmentType === 'batch' && batchId) {
             await Batch.findByIdAndUpdate(batchId, { $inc: { enrolledStudents: 1 } });
+            // Note: If you want to track batches in the same array, you might want a separate array or just push the ID
+            // For now, let's keep it focussed on courses or add batches too
+            await User.findByIdAndUpdate(userId, { $addToSet: { enrolledCourses: batchId } });
         }
 
         res.status(201).json({

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getAllCourses,
+    getAllCoursesData,
     getCourseById,
     createCourse,
     updateCourse,
@@ -18,6 +19,7 @@ const { fieldsImages } = require('../../multer');
 
 // Public routes
 router.get('/', validatePagination, getAllCourses);
+router.get('/all-data', getAllCoursesData);
 router.get('/featured', getFeaturedCourses);
 router.get('/popular', getPopularCourses);
 router.get('/category/:category', getCoursesByCategory);

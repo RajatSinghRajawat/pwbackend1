@@ -77,6 +77,10 @@ const courseSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    date: {
+        type: String,
+        trim: true // e.g., "Starting 20th April", "2024-04-20"
+    },
     
     // Status
     isActive: {

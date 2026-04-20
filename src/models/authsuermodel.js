@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Phone is required'],
         trim: true
     },
+    profilePicture: {
+        type: String,
+        default: ''
+    },
+    enrolledCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+    }],
     role: {
         type: String,
         enum: ['student', 'instructor', 'admin'],

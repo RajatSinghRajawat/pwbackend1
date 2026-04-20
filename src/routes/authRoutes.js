@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const User = require('../models/authsuermodel');
 const { validateAuth } = require('../middleware/validation');
 const { authenticateUser } = require('../middleware/auth');
+const { singleImage } = require('../../multer');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -13,6 +14,67 @@ const generateToken = (id) => {
         expiresIn: process.env.JWT_EXPIRE || '30d'
     });
 };
+
+// @desc    Update profile basic info
+// @route   PUT /api/auth/profile
+// @access  Private
+router.put('/profile', authenticateUser, async (req, res) => {
+    try {
+        const { name, email, phone } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (phone) user.phone = phone;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile',
+            error: error.message
+        });
+    }
+});
+
+// @desc    Update profile photo
+// @route   POST /api/auth/profile/photo
+// @access  Private
+router.post('/profile/photo', authenticateUser, singleImage, async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload an image'
+            });
+        }
+
+        const user = await User.findById(req.user._id);
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const relativePath = req.file.path.replace(/\\/g, '/').split('public/')[1];
+        
+        user.profilePicture = `${baseUrl}/${relativePath}`;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile photo updated successfully',
+            profilePicture: user.profilePicture
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile photo',
+            error: error.message
+        });
+    }
+});
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -54,7 +116,9 @@ router.post('/register', validateAuth.register, async (req, res) => {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
-                    role: user.role
+                    role: user.role,
+                    profilePicture: user.profilePicture || '',
+                    enrolledCourses: user.enrolledCourses || []
                 },
                 token
             }
@@ -113,7 +177,9 @@ router.post('/login', validateAuth.login, async (req, res) => {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
-                    role: user.role
+                    role: user.role,
+                    profilePicture: user.profilePicture || '',
+                    enrolledCourses: user.enrolledCourses || []
                 },
                 token
             }
@@ -132,7 +198,7 @@ router.post('/login', validateAuth.login, async (req, res) => {
 // @access  Private
 router.get('/me', authenticateUser, async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user._id).populate('enrolledCourses');
 
         res.status(200).json({
             success: true,
