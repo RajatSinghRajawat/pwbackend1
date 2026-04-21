@@ -112,7 +112,7 @@ const validateCourse = {
 const validateBatch = {
     create: (req, res, next) => {
         const errors = [];
-        const { title, description, courseId, examType, instructorId, startDate, endDate, duration, totalClasses, maxStudents, price, originalPrice } = req.body;
+        const { title, description, courseId, examType, startDate, endDate, duration, totalClasses, maxStudents, price, originalPrice } = req.body;
 
         if (!title || title.trim().length < 3 || title.trim().length > 200) {
             errors.push({ field: 'title', message: 'Title is required and must be between 3 and 200 characters' });
@@ -129,10 +129,6 @@ const validateBatch = {
         const validExamTypes = ['jee', 'neet', 'gate', 'upsc', 'defence', 'ese', 'foundation', 'commerce', 'arts', 'other'];
         if (!examType || !validExamTypes.includes(examType)) {
             errors.push({ field: 'examType', message: 'Valid exam type is required' });
-        }
-
-        if (!instructorId || !instructorId.match(/^[0-9a-fA-F]{24}$/)) {
-            errors.push({ field: 'instructorId', message: 'Valid instructor ID is required' });
         }
 
         if (!startDate || isNaN(new Date(startDate).getTime())) {

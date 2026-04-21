@@ -9,7 +9,6 @@ const getAllClasses = async (req, res) => {
         const {
             courseId,
             batchId,
-            instructorId,
             classType,
             status,
             isActive,
@@ -21,7 +20,6 @@ const getAllClasses = async (req, res) => {
 
         if (courseId) filter.courseId = courseId;
         if (batchId) filter.batchId = batchId;
-        if (instructorId) filter.instructorId = instructorId;
         if (classType) filter.classType = classType;
         if (status) filter.status = status;
         if (isActive !== undefined) filter.isActive = isActive === 'true';
@@ -31,7 +29,6 @@ const getAllClasses = async (req, res) => {
         const classes = await Class.find(filter)
             .populate('courseId', 'title category')
             .populate('batchId', 'title examType')
-            .populate('instructorId', 'name email image')
             .sort({ scheduledDate: 1, startTime: 1 })
             .skip(skip)
             .limit(parseInt(limit));
@@ -65,7 +62,6 @@ const getClassById = async (req, res) => {
         const classData = await Class.findById(req.params.id)
             .populate('courseId')
             .populate('batchId')
-            .populate('instructorId')
             .populate('attendees.userId', 'name email');
 
         if (!classData) {
@@ -123,9 +119,12 @@ const getClassById = async (req, res) => {
 // @access  Private (Admin/Instructor)
 const createClass = async (req, res) => {
     try {
+        if (req.file) {
+            req.body.videoFile = req.file.filename;
+        }
         const classData = new Class(req.body);
         const savedClass = await classData.save();
-        await savedClass.populate('courseId batchId instructorId');
+        await savedClass.populate('courseId batchId');
 
         res.status(201).json({
             success: true,
@@ -146,12 +145,15 @@ const createClass = async (req, res) => {
 // @access  Private (Admin/Instructor)
 const updateClass = async (req, res) => {
     try {
+        if (req.file) {
+            req.body.videoFile = req.file.filename;
+        }
         const classData = await Class.findByIdAndUpdate(
             req.params.id,
             { ...req.body, updatedAt: Date.now() },
             { new: true, runValidators: true }
         )
-            .populate('courseId batchId instructorId');
+            .populate('courseId batchId');
 
         if (!classData) {
             return res.status(404).json({
@@ -263,7 +265,6 @@ const getLiveClasses = async (req, res) => {
         })
             .populate('courseId', 'title')
             .populate('batchId', 'title')
-            .populate('instructorId', 'name image')
             .sort({ startTime: 1 });
 
         res.status(200).json({

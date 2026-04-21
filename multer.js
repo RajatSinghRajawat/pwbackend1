@@ -63,22 +63,30 @@ const videoFilter = (req, file, cb) => {
     "video/mpeg",
     "video/quicktime",
     "video/x-msvideo",
+    "video/x-ms-wmv",
+    "video/x-flv",
+    "video/3gpp",
     "video/webm",
     "video/x-matroska",
+    "video/mp2t",
+    "video/mp4v-es",
+    "video/x-m4v",
+    "application/octet-stream", // Fallback for many browsers
   ];
 
   // Allowed file extensions
-  const allowedExtensions = /\.(mp4|mpeg|mov|avi|webm|mkv)$/i;
+  const allowedExtensions = /\.(mp4|mpeg|mov|avi|webm|mkv|wmv|flv|3gp|m4v|ts)$/i;
   const extname = allowedExtensions.test(
     path.extname(file.originalname)
   );
 
   // Check both MIME type and extension
-  if (allowedMimeTypes.includes(file.mimetype) && extname) {
+  const isGenericMime = file.mimetype === "application/octet-stream";
+  if ((allowedMimeTypes.includes(file.mimetype) || isGenericMime) && extname) {
     return cb(null, true);
   } else {
     const error = new Error(
-      `Invalid file type. Only video files (mp4, mpeg, mov, avi, webm, mkv) are allowed.`
+      `Invalid file type. Only video files (mp4, mpeg, mov, avi, webm, mkv, wmv, flv, 3gp) are allowed.`
     );
     error.status = 400;
     return cb(error, false);
@@ -99,18 +107,26 @@ const mediaFilter = (req, file, cb) => {
     "video/mpeg",
     "video/quicktime",
     "video/x-msvideo",
+    "video/x-ms-wmv",
+    "video/x-flv",
+    "video/3gpp",
     "video/webm",
     "video/x-matroska",
+    "video/mp2t",
+    "video/mp4v-es",
+    "video/x-m4v",
+    "application/octet-stream",
   ];
 
   // Allowed file extensions
-  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|avif|mp4|mpeg|mov|avi|webm|mkv)$/i;
+  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|avif|mp4|mpeg|mov|avi|webm|mkv|wmv|flv|3gp|m4v|ts)$/i;
   const extname = allowedExtensions.test(
     path.extname(file.originalname)
   );
 
   // Check both MIME type and extension
-  if (allowedMimeTypes.includes(file.mimetype) && extname) {
+  const isGenericMime = file.mimetype === "application/octet-stream";
+  if ((allowedMimeTypes.includes(file.mimetype) || isGenericMime) && extname) {
     return cb(null, true);
   } else {
     const error = new Error(

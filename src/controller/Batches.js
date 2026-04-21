@@ -10,7 +10,6 @@ const getAllBatches = async (req, res) => {
             batchType,
             status,
             courseId,
-            instructorId,
             isFeatured,
             isPopular,
             mode,
@@ -28,7 +27,6 @@ const getAllBatches = async (req, res) => {
         if (batchType) filter.batchType = batchType;
         if (status) filter.status = status;
         if (courseId) filter.courseId = courseId;
-        if (instructorId) filter.instructorId = instructorId;
         if (isFeatured !== undefined) filter.isFeatured = isFeatured === 'true';
         if (isPopular !== undefined) filter.isPopular = isPopular === 'true';
         if (mode) filter.mode = mode;
@@ -51,7 +49,6 @@ const getAllBatches = async (req, res) => {
         // Fetch batches with pagination
         const batches = await Batch.find(filter)
             .populate('courseId', 'title category')
-            .populate('instructorId', 'name email')
             .sort(sortOptions)
             .skip(skip)
             .limit(parseInt(limit));
@@ -84,8 +81,7 @@ const getAllBatches = async (req, res) => {
 const getBatchById = async (req, res) => {
     try {
         const batch = await Batch.findById(req.params.id)
-            .populate('courseId', 'title category')
-            .populate('instructorId', 'name email');
+            .populate('courseId', 'title category');
 
         if (!batch) {
             return res.status(404).json({
@@ -124,7 +120,6 @@ const createBatch = async (req, res) => {
 
         // Populate references
         await savedBatch.populate('courseId', 'title category');
-        await savedBatch.populate('instructorId', 'name email');
 
         res.status(201).json({
             success: true,
@@ -157,8 +152,7 @@ const updateBatch = async (req, res) => {
             { ...req.body, updatedAt: Date.now() },
             { new: true, runValidators: true }
         )
-            .populate('courseId', 'title category')
-            .populate('instructorId', 'name email');
+            .populate('courseId', 'title category');
 
         if (!batch) {
             return res.status(404).json({
@@ -215,7 +209,7 @@ const deleteBatch = async (req, res) => {
 const getBatchesByExamType = async (req, res) => {
     try {
         const batches = await Batch.findByExamType(req.params.examType)
-            .populate('courseId instructorId')
+            .populate('courseId')
             .sort({ priority: -1, createdAt: -1 });
 
         res.status(200).json({
@@ -239,7 +233,7 @@ const getFeaturedBatches = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
         const batches = await Batch.findFeatured(limit)
-            .populate('courseId instructorId');
+            .populate('courseId');
 
         res.status(200).json({
             success: true,
@@ -262,7 +256,7 @@ const getPopularBatches = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
         const batches = await Batch.findPopular(limit)
-            .populate('courseId instructorId');
+            .populate('courseId');
 
         res.status(200).json({
             success: true,
@@ -284,7 +278,7 @@ const getPopularBatches = async (req, res) => {
 const getActiveBatches = async (req, res) => {
     try {
         const batches = await Batch.findActive()
-            .populate('courseId instructorId')
+            .populate('courseId')
             .sort({ startDate: 1 });
 
         res.status(200).json({
@@ -447,8 +441,7 @@ const updateEnrollment = async (req, res) => {
 const getBatchStatistics = async (req, res) => {
     try {
         const batch = await Batch.findById(req.params.id)
-            .populate('courseId', 'title category')
-            .populate('instructorId', 'name email');
+            .populate('courseId', 'title category');
 
         if (!batch) {
             return res.status(404).json({
@@ -461,7 +454,6 @@ const getBatchStatistics = async (req, res) => {
             batchId: batch._id,
             title: batch.title,
             course: batch.courseId?.title,
-            instructor: batch.instructorId?.name,
             totalStudents: batch.maxStudents,
             enrolledStudents: batch.enrolledStudents,
             availableSeats: batch.availableSeats,

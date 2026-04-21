@@ -66,8 +66,7 @@ const initializeSocket = (server) => {
                 }
 
                 // Verify class exists and is live
-                const classData = await Class.findById(classId)
-                    .populate('instructorId', 'name email');
+                const classData = await Class.findById(classId);
 
                 if (!classData) {
                     socket.emit('error', { message: 'Class not found' });
@@ -114,7 +113,7 @@ const initializeSocket = (server) => {
                     participantsCount,
                     classData: {
                         title: classData.title,
-                        instructor: classData.instructorId?.name || 'Instructor',
+                        instructor: 'Instructor',
                         status: classData.status
                     }
                 });

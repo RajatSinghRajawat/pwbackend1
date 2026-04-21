@@ -30,13 +30,6 @@ const batchSchema = new mongoose.Schema({
         default: 'regular'
     },
 
-    // Instructor Details
-    instructorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Instructor',
-        required: true
-    },
-
     // Duration & Schedule
     startDate: {
         type: Date,
@@ -164,7 +157,6 @@ const batchSchema = new mongoose.Schema({
 
 // Indexes
 batchSchema.index({ courseId: 1 });
-batchSchema.index({ instructorId: 1 });
 batchSchema.index({ examType: 1 });
 batchSchema.index({ batchType: 1 });
 batchSchema.index({ status: 1 });

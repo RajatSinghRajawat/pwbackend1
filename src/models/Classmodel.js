@@ -19,11 +19,6 @@ const classSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Batch'
     },
-    instructorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Instructor',
-        required: [true, 'Instructor ID is required']
-    },
     classType: {
         type: String,
         enum: ['live', 'recorded', 'doubt', 'revision'],
@@ -112,7 +107,6 @@ const classSchema = new mongoose.Schema({
 // Indexes
 classSchema.index({ courseId: 1 });
 classSchema.index({ batchId: 1 });
-classSchema.index({ instructorId: 1 });
 classSchema.index({ classType: 1 });
 classSchema.index({ status: 1 });
 classSchema.index({ scheduledDate: 1 });
